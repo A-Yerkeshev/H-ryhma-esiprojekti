@@ -1,12 +1,13 @@
 from geopy import distance
 import mysql.connector
+import time
 
 yhteys = mysql.connector.connect(
     host='127.0.0.1',
     port=3306,
     database='flight_game',
     user='root',
-    password='pass',
+    password='toast',
     autocommit=False
 )
 
@@ -23,7 +24,6 @@ dist_by_type = {
 }
 
 def generate_random_location():
-    def check_if_arrived():
         sql = "SELECT ident, name, type, latitude_deg, longitude_deg " \
               "FROM airport WHERE NOT type='closed'" \
               " ORDER BY RAND() LIMIT 1;"
@@ -54,7 +54,7 @@ def fetch_available_airports(curr_lat, curr_long, type):
   # ((delta x)_to_km)^2 + ((delta y)_to_km)^2 <= R^2
   # Latitude: 1 deg = 110.574 km
   # Longitude: 1 deg = 111.320*cos(latitude) km
-  f"""SELECT ident, name, iso_country, latitude_deg, longitude_deg FROM airport
+  sql = f"""SELECT ident, name, iso_country, latitude_deg, longitude_deg FROM airport
   WHERE POWER(({curr_lat} + latitude_deg)*110.574, 2) +
   POWER(({curr_long} + longitude_deg)*111.320*cos(latitude_deg), 2) <= POWER({radius_km}, 2)
   AND type != 'closed'
@@ -68,10 +68,10 @@ def fetch_available_airports(curr_lat, curr_long, type):
   POWER(({curr_long} - longitude_deg)*111.320*cos(latitude_deg), 2) <= POWER({radius_km}, 2)
   AND type != 'closed'
   ORDER by (latitude_deg + longitude_deg) LIMIT 50;"""
-
-# def fetch_available_airports(curr_lat, curr_long):
-
-
+  cursor = yhteys.cursor()
+  cursor.execute(sql)
+  fetched = cursor.fetchall()
+  return fetched
 # def print_available_airports():
 
 
@@ -80,9 +80,17 @@ def fetch_available_airports(curr_lat, curr_long, type):
 
 # def check_if_arrived():
 
+
 current = destination = generate_random_location()
-print(current)
 while destination == current or \
     distance.distance([current["lat"], current["long"]],
                           [destination["lat"], destination["long"]]).km < 5000:
     destination = generate_random_location()
+
+#change ident into country later
+print(f"Aloitus paikkasi on {current['name']} maassa {current['ident']} ja päämääräsi on {destination['name']} maassa {destination['ident']}.")
+input("Paina Enter printataksesi lähimmät lentokentät.")
+
+airports = fetch_available_airports(current["lat"], current["long"], current["type"])
+for airport in airports:
+    print(airport)
