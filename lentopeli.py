@@ -23,7 +23,24 @@ dist_by_type = {
 }
 
 def generate_random_location():
-  print
+        sql = "SELECT ident, name, type, latitude_deg, longitude_deg " \
+              "FROM airport WHERE NOT type='closed'" \
+              " ORDER BY RAND() LIMIT 1;"
+        print(sql)
+        cursor = yhteys.cursor()
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        ident, name, type, lat, long = result[0]
+
+        parsed = {
+            "ident": ident,
+            "name": name,
+            "type": type,
+            "lat": lat,
+            "long": long,
+        }
+        return parsed
+
 def fetch_available_airports(curr_lat, curr_long, type):
   # Define flight radius based on airport type
   radius_km = None
@@ -34,7 +51,6 @@ def fetch_available_airports(curr_lat, curr_long, type):
 
   # Select all airports within the reach of current location
   # Distance = 3963.0 * arccos[(sin(lat1) * sin(lat2)) + cos(lat1) * cos(lat2) * cos(long2 – long1)] * 1.609344
-
   f"""SELECT ident, name, iso_country, latitude_deg, longitude_deg FROM airport
   WHERE 3963.0 * acos((sin(RADIANS({curr_lat})) * sin(RADIANS(latitude_deg))) +
   cos(RADIANS({curr_lat})) * cos(RADIANS(latitude_deg)) *
@@ -66,8 +82,15 @@ def check_if_arrived():
     return parsed
 
 current = destination = generate_random_location()
-print(current)
 while destination == current or \
     distance.distance([current["lat"], current["long"]],
                           [destination["lat"], destination["long"]]).km < 5000:
     destination = generate_random_location()
+
+#change ident into country later
+print(f"Aloitus paikkasi on {current['name']} maassa {current['ident']} ja päämääräsi on {destination['name']} maassa {destination['ident']}.")
+input("Paina Enter printataksesi lähimmät lentokentät.")
+
+airports = fetch_available_airports(current["lat"], current["long"], current["type"])
+for airport in airports:
+    print(airport)
