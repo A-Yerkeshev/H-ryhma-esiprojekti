@@ -1,13 +1,12 @@
 from geopy import distance
 import mysql.connector
-import time
 
 yhteys = mysql.connector.connect(
     host='127.0.0.1',
     port=3306,
     database='flight_game',
     user='root',
-    password='toast',
+    password='pass',
     autocommit=False
 )
 
@@ -72,6 +71,7 @@ def fetch_available_airports(curr_lat, curr_long, type):
   cursor.execute(sql)
   fetched = cursor.fetchall()
   return fetched
+
 # def print_available_airports():
 
 
