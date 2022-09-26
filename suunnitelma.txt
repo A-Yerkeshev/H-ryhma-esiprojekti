@@ -1,0 +1,53 @@
+=====Variables=====
+current - {ident, name, type, lat, long}
+destination - {ident, name, type, lat, long}
+airports - [{ident, name, type, lat, long}, ...]
+km_total - number
+dist_by_type = {
+	closed: 0,
+	balloonport: 10,
+	heliport: 50,
+	small_airport: 100,
+	medium_airport: 200,
+	large_airport: 500,
+	seaplane_base: 100
+}
+
+=====Functions=====
+generate_random_location() -> airport(ident, name, type, lat, long)
+1. Select random row from airport table
+SELECT ident, name, type FROM airport WHERE NOT type='closed' ORDER BY RAND() LIMIT 1;
+2. If ident is equal to 'current'[ident] - select another row
+3. Return ident, name, type, lat and long as dictionary
+
+fetch_available_airports(curr_lat, curr_long) -> [airports]
+1. Accepts lat and long of current location as arguments
+2. Select from database ident, name, type, lat and long of airports, that are within reach of current airport and do not have type 'closed'
+SELECT ident, name. lati
+(use dist_by_type and airport type to identify maximum distance)
+(use geopy to calculate distance to each airport)
+3. For each airport, add calculated distance
+4. Save selected airports to 'airports' variable
+
+print_available_airports -> airport(ident, name, distance, type)
+1. Print ident, name, distance, type of available airports from 'airports' to user
+
+move(ident[typed by player])
+1. Take ident from user
+2. Find airport in 'airports' by ident and set it to 'current'
+3. Increase km_total by distance traveled
+
+check_if_arrived -> boolean
+1. Check if 'current'[ident] is equal to 'destination'[ident]
+2. Return True/False
+
+=====Program order=====
+Initialize variables
+Print greeting message and explaing game rules
+Run generate_random_location() twice and save result to 'current' and 'destination'
+While check_if_arrived returns False:
+fetch_available_airports
+print_available_airports
+Ask player to input desired location's ident
+move
+
