@@ -23,7 +23,25 @@ dist_by_type = {
 }
 
 def generate_random_location():
-  print
+    def check_if_arrived():
+        sql = "SELECT ident, name, type, latitude_deg, longitude_deg " \
+              "FROM airport WHERE NOT type='closed'" \
+              " ORDER BY RAND() LIMIT 1;"
+        print(sql)
+        cursor = yhteys.cursor()
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        ident, name, type, lat, long = result[0]
+
+        parsed = {
+            "ident": ident,
+            "name": name,
+            "type": type,
+            "lat": lat,
+            "long": long,
+        }
+        return parsed
+
 def fetch_available_airports(curr_lat, curr_long, type):
   # Define flight radius based on airport type
   radius_km = None
@@ -50,28 +68,6 @@ def fetch_available_airports(curr_lat, curr_long, type):
   POWER(({curr_long} - longitude_deg)*111.320*cos(latitude_deg), 2) <= POWER({radius_km}, 2)
   AND type != 'closed'
   ORDER by (latitude_deg + longitude_deg) LIMIT 50;"""
-def print_available_airports():
-  print
-def move(ident):
-  print
-def check_if_arrived():
-    sql = "SELECT ident, name, type, latitude_deg, longitude_deg " \
-          "FROM airport WHERE NOT type='closed'"\
-          " ORDER BY RAND() LIMIT 1;"
-    print(sql)
-    cursor = yhteys.cursor()
-    cursor.execute(sql)
-    result = cursor.fetchall()
-    ident, name, type, lat, long = result[0]
-
-    parsed = {
-      "ident":ident,
-      "name":name,
-      "type":type,
-      "lat":lat,
-      "long":long,
-    }
-    return parsed
 
 # def fetch_available_airports(curr_lat, curr_long):
 
