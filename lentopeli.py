@@ -41,7 +41,7 @@ def generate_random_location():
         }
         return parsed
 
-def fetch_available_airports(curr_lat, curr_long, type):
+def fetch_available_airports(curr_lat, curr_long, dest_lat, dest_long type):
   # Define flight radius based on airport type
   radius_km = None
   if type in dist_by_type:
@@ -49,19 +49,24 @@ def fetch_available_airports(curr_lat, curr_long, type):
   else:
     raise Exception(f"Airport type '{type}' is invalid.")
 
-  # Select all airports within the reach of current location
+  # Select all airports within the reach of current location,
+  # based on airport type, order by ones closest to destination
   # Distance = 3963.0 * arccos[(sin(lat1) * sin(lat2)) + cos(lat1) * cos(lat2) * cos(long2 – long1)] * 1.609344
   f"""SELECT ident, name, iso_country, latitude_deg, longitude_deg FROM airport
   WHERE 3963.0 * acos((sin(RADIANS({curr_lat})) * sin(RADIANS(latitude_deg))) +
   cos(RADIANS({curr_lat})) * cos(RADIANS(latitude_deg)) *
   cos(RADIANS(longitude_deg) - RADIANS({curr_long}))) * 1.609344 <= {radius_km}
   AND type != 'closed'
-  ORDER by (latitude_deg + longitude_deg) LIMIT 50;
-  """
+  ORDER by (3963.0 * acos((sin(RADIANS(latitude_deg)) * sin(RADIANS({dest_lat}))) +
+  cos(RADIANS(latitude_deg)) * cos(RADIANS({dest_lat})) *
+  cos(RADIANS({dest_long}) - RADIANS(longitude_deg))) * 1.609344) LIMIT 15;"""
+
 def print_available_airports():
   print
+
 def move(ident):
   print
+
 def check_if_arrived():
     sql = "SELECT ident, name, type, latitude_deg, longitude_deg " \
           "FROM airport WHERE NOT type='closed'"\
@@ -80,6 +85,8 @@ def check_if_arrived():
       "long":long,
     }
     return parsed
+
+
 
 current = destination = generate_random_location()
 while destination == current or \
