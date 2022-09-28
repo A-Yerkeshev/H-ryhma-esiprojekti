@@ -61,11 +61,12 @@ def fetch_available_airports(curr_lat, curr_long, dest_lat, dest_long, type):
     # Select all airports within the reach of current location,
     # based on airport type, order by ones closest to destination
     # Distance = 3963.0 * arccos[(sin(lat1) * sin(lat2)) + cos(lat1) * cos(lat2) * cos(long2 – long1)] * 1.609344
-    sql = f"""SELECT ident, name, iso_country, latitude_deg, longitude_deg FROM airport
+    sql = f"""SELECT ident, airport.name, country.name, latitude_deg, longitude_deg FROM airport, country
     WHERE 3963.0 * acos((sin(RADIANS({curr_lat})) * sin(RADIANS(latitude_deg))) +
     cos(RADIANS({curr_lat})) * cos(RADIANS(latitude_deg)) *
     cos(RADIANS(longitude_deg) - RADIANS({curr_long}))) * 1.609344 <= {radius_km}
     AND type != 'closed'
+    AND country.iso_country = airport.iso_country
     ORDER by (3963.0 * acos((sin(RADIANS(latitude_deg)) * sin(RADIANS({dest_lat}))) +
     cos(RADIANS(latitude_deg)) * cos(RADIANS({dest_lat})) *
     cos(RADIANS({dest_long}) - RADIANS(longitude_deg))) * 1.609344) LIMIT 15;"""
