@@ -102,6 +102,6 @@ print(f"Your current location is '{curr['airport_name']}' in {curr['country_name
 
 input("\nPress 'Enter' to fetch the nearest airports.")
 
-airports = fetch_available_airports(curr["lat"], curr["long"], curr["type"])
+airports = fetch_available_airports(curr["lat"], curr["long"], dest["lat"], dest["long"], curr["type"])
 for airport in airports:
     print(airport)
