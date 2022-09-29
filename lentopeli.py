@@ -1,5 +1,6 @@
 from geopy import distance
 import mysql.connector
+import time
 
 yhteys = mysql.connector.connect(
     host='127.0.0.1',
@@ -38,9 +39,13 @@ def generate_random_location():
     cursor = yhteys.cursor()
     cursor.execute(sql)
     result = cursor.fetchall()
-    ident, airport_name, country_name, type, lat, long = result[0]
 
-    parsed = {
+    return tuple_to_dict(result[0])
+
+def tuple_to_dict(tuple):
+    ident, airport_name, country_name, type, lat, long = tuple
+
+    return {
         "ident": ident,
         "airport_name": airport_name,
         "country_name": country_name,
@@ -48,7 +53,6 @@ def generate_random_location():
         "lat": lat,
         "long": long,
     }
-    return parsed
 
 def fetch_available_airports(curr_lat, curr_long, dest_lat, dest_long, type):
     # Define flight radius based on airport type
@@ -61,27 +65,29 @@ def fetch_available_airports(curr_lat, curr_long, dest_lat, dest_long, type):
     # Select all airports within the reach of current location,
     # based on airport type, order by ones closest to destination
     # Distance = 3963.0 * arccos[(sin(lat1) * sin(lat2)) + cos(lat1) * cos(lat2) * cos(long2 – long1)] * 1.609344
-    sql = f"""SELECT ident, airport.name, country.name, latitude_deg, longitude_deg FROM airport, country
+    sql = f"""SELECT ident, airport.name, country.name, type, latitude_deg, longitude_deg FROM airport, country
     WHERE 3963.0 * acos((sin(RADIANS({curr_lat})) * sin(RADIANS(latitude_deg))) +
     cos(RADIANS({curr_lat})) * cos(RADIANS(latitude_deg)) *
     cos(RADIANS(longitude_deg) - RADIANS({curr_long}))) * 1.609344 <= {radius_km}
     AND type != 'closed'
-    AND country.iso_country = airport.iso_country
-    ORDER by (3963.0 * acos((sin(RADIANS(latitude_deg)) * sin(RADIANS({dest_lat}))) +
-    cos(RADIANS(latitude_deg)) * cos(RADIANS({dest_lat})) *
-    cos(RADIANS({dest_long}) - RADIANS(longitude_deg))) * 1.609344) LIMIT 15;"""
+    AND ident != '{curr["ident"]}'
+    AND country.iso_country = airport.iso_country LIMIT 10;"""
     cursor = yhteys.cursor()
     cursor.execute(sql)
-    fetched = cursor.fetchall()
-    return fetched
+    result = cursor.fetchall()
+    airports.clear()
+    for entry in result:
+        airports.append(entry)
 
 
 def print_available_airports():
-    print
+    for i, airport in enumerate(airports):
+        print(str(i) + ' : ' + str(airport))
 
 
-def move(ident):
-    print
+def move(index):
+    global curr
+    curr = tuple_to_dict(airports[index])
 
 
 # initialize start and end locations, calculate distance
@@ -94,17 +100,23 @@ while dest == curr or (dist > 6000 or dist < 3000):
     dest = generate_random_location()
     dist = get_distance(curr["lat"], curr["long"], dest["lat"], dest["long"])
 
-while check_if_arrived == False:
-    if curr == dest:
-        check_if_arrived = True
-    else:
-        print(f"Your current location is '{curr['airport_name']}' in {curr['country_name']}"
-            f"\nYour destination is '{dest['airport_name']}' in {dest['country_name']}."
-            f"\nThe destination is {dist:.0f} kilometers away."
-              f"\nYou are currently in a {curr['type']}.")
-        input("\nPress 'Enter' to fetch the nearest airports.")
-        airports = fetch_available_airports(curr["lat"], curr["long"], dest["lat"], dest["long"], curr["type"])
-        for airport in airports:
-            print(airport)
-        icao = input("\nEnter the ICAO-code of the airport you want to go to: ")
-        move(icao)
+# Start the game
+print(f"Your current location is '{curr['airport_name']}' in {curr['country_name']}"
+    f"\nYour destination is '{dest['airport_name']}' in {dest['country_name']}."
+    f"\nThe destination is {dist:.0f} kilometers away."
+        f"\nYou are currently in a {curr['type']}.")
+
+while curr['ident'] != dest['ident']:
+    input("\nPress 'Enter' to fetch the nearest airports.")
+    fetch_available_airports(curr["lat"], curr["long"], dest["lat"], dest["long"], curr["type"])
+    print_available_airports()
+
+    index = int(input("\nEnter the index of the airport you want to go to: "))
+
+    while index >= len(airports) or index < 0:
+        print(f"Your input is invalid. Please, type number between 0 and {len(airports)}")
+        index = int(input("\nEnter the index of the airport you want to go to: "))
+
+    move(index)
+    print(f"You fly {get_distance(curr['lat'], curr['long'], dest['lat'], dest['long']):.0f} km")
+    print(f"Your new location is '{curr['airport_name']}' in {curr['country_name']}")
