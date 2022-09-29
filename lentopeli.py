@@ -1,6 +1,5 @@
 from geopy import distance
 import mysql.connector
-import time
 
 yhteys = mysql.connector.connect(
     host='127.0.0.1',
