@@ -156,7 +156,7 @@ while curr['ident'] != dest['ident']:
     index = int(input("\nEnter the index of the airport you want to go to: ")) - 1
 
     while index >= len(airports) or index < 0:
-        print(f"Your input is invalid. Please, type number between 0 and {len(airports)}")
+        print(f"Your input is invalid. Please type a number between 0 and {len(airports)}")
         index = int(input("\nEnter the index of the airport you want to go to: ")) - 1
 
     temp_dest = tuple_to_dict(airports[index])
@@ -180,5 +180,5 @@ while curr['ident'] != dest['ident']:
     time.sleep(0.3)
     print("\r               >", end="")
     time.sleep(0.3)
-print(f"Congratulations! You made it to your destination at {dest}.\n"
-      f"It took you {turns_total} turns and {km_total} km in total.")
+print(f"\nCongratulations! You made it to your destination, {dest['airport_name']}.\n"
+      f"It took you {turns_total} turns and {km_total:.1f} km in total.")
