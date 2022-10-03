@@ -120,10 +120,8 @@ while curr['ident'] != dest['ident']:
     flight_compare = get_distance(temp_dest['lat'], temp_dest['long'], dest['lat'], dest['long'])
     if dist > flight_compare:
         dist = dist - flight
-    elif dist < flight:
-        dist = dist + flight
     else:
-        dist = dist - flight
+        dist = dist + flight
     turns_total = turns_total + 1
     km_total = km_total + flight
     curr = tuple_to_dict(airports[index])
