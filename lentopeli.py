@@ -75,7 +75,7 @@ def fetch_available_airports(curr_lat, curr_long, dest_lat, dest_long, type):
     cos(RADIANS(longitude_deg) - RADIANS({curr_long}))) * 1.609344 <= {radius_km}
     AND type != 'closed'
     AND ident != '{curr["ident"]}'
-    AND country.iso_country = airport.iso_country LIMIT 25;"""
+    AND country.iso_country = airport.iso_country;"""
     cursor = yhteys.cursor()
     cursor.execute(sql)
     result = cursor.fetchall()
@@ -84,6 +84,9 @@ def fetch_available_airports(curr_lat, curr_long, dest_lat, dest_long, type):
         airports.append(entry)
 
 def print_available_airports():
+    # Order airports by direction
+    direction_groups = [[], [], [], [], [], [], [], []]
+
     for i, airport in enumerate(airports):
         airport = tuple_to_dict(airport)
 
@@ -94,23 +97,38 @@ def print_available_airports():
 
         if bearing >= -22.5 and bearing < 22.5:
             direction = 'North'
+            direction_groups[0].append(airport)
         elif bearing >= 22.5 and bearing < 67.5:
             direction = 'North-West'
+            direction_groups[1].append(airport)
         elif bearing >= 67.5 and bearing < 112.5:
             direction = 'West'
+            direction_groups[2].append(airport)
         elif bearing >= 112.5 and bearing < 157.5:
             direction = 'South-West'
+            direction_groups[3].append(airport)
         elif bearing >= 157.5 or bearing < -157.5:
             direction = 'South'
+            direction_groups[4].append(airport)
         elif bearing >= -157.5 and bearing < -112.5:
             direction = 'South-East'
+            direction_groups[5].append(airport)
         elif bearing >= -112.5 and bearing < -67.5:
             direction = 'East'
+            direction_groups[6].append(airport)
         elif bearing >= -67.5 and bearing < -22.5:
             direction = 'North-East'
+            direction_groups[7].append(airport)
         else:
             direction = 'Unknown direction'
 
+    sorted = []
+    for group in direction_groups:
+        for airport in group:
+            sorted.append(airport)
+
+    # Print available airports
+    for i, airport in enumerate(sorted):
         print(f"{str(i + 1)}: {airport['airport_name']}, in {airport['country_name']} - "
               f"{get_distance(curr['lat'], curr['long'], airport['lat'], airport['long']):.1f} km away"
               f" in {direction} direction.")
@@ -161,12 +179,12 @@ while curr['ident'] != dest['ident']:
     curr = tuple_to_dict(airports[index])
     print(f"\nYou fly {flight:.1f} km to {curr['airport_name']}.")
     print("\r>", end="")
-    time.sleep(0.2)
+    time.sleep(0.3)
     print("\r----->", end="")
-    time.sleep(0.2)
+    time.sleep(0.3)
     print("\r---------->", end="")
-    time.sleep(0.2)
+    time.sleep(0.3)
     print("\r      --------->", end="")
-    time.sleep(0.2)
+    time.sleep(0.3)
     print("\r               >", end="")
-    time.sleep(0.2)
+    time.sleep(0.3)
