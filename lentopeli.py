@@ -113,15 +113,7 @@ def print_available_airports():
 
         print(f"{str(i + 1)}: {airport['airport_name']}, in {airport['country_name']} - "
               f"{get_distance(curr['lat'], curr['long'], airport['lat'], airport['long']):.1f} km away"
-              f" in {direction} direction.")
-
-
-def move(index):
-    global curr
-    curr = tuple_to_dict(airports[index])
-    airport = tuple_to_dict(airport)
-    print(f"{str(i + 1)}: {airport['airport_name']}, {airport['country_name']} - "
-            f"{get_distance(curr['lat'], curr['long'], airport['lat'], airport['long']):.1f} km away")
+              f" to the {direction}.")
 
 # initialize start and end locations, calculate distance
 check_if_arrived = False
@@ -170,3 +162,5 @@ while curr['ident'] != dest['ident']:
     time.sleep(0.2)
     print("\r               >", end="")
     time.sleep(0.2)
+print(f"Congratulations! You made it to your destination at {dest}.\n"
+      f"It took you {turns_total} turns and {km_total} km in total.")
