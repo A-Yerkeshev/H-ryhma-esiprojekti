@@ -162,5 +162,5 @@ while curr['ident'] != dest['ident']:
     time.sleep(0.3)
     print("\r               >", end="")
     time.sleep(0.3)
-print(f"\nCongratulations! You made it to your destination at {dest}.\n"
+print(f"\nCongratulations! You made it to your destination, {dest[airport_name]}.\n"
       f"It took you {turns_total} turns and {km_total:.1f} km in total.")
