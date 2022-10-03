@@ -75,7 +75,7 @@ def fetch_available_airports(curr_lat, curr_long, dest_lat, dest_long, type):
     cos(RADIANS(longitude_deg) - RADIANS({curr_long}))) * 1.609344 <= {radius_km}
     AND type != 'closed'
     AND ident != '{curr["ident"]}'
-    AND country.iso_country = airport.iso_country LIMIT 25;"""
+    AND country.iso_country = airport.iso_country;"""
     cursor = yhteys.cursor()
     cursor.execute(sql)
     result = cursor.fetchall()
@@ -84,6 +84,9 @@ def fetch_available_airports(curr_lat, curr_long, dest_lat, dest_long, type):
         airports.append(entry)
 
 def print_available_airports():
+    # Order airports by direction
+    direction_groups = [[], [], [], [], [], [], [], []]
+
     for i, airport in enumerate(airports):
         airport = tuple_to_dict(airport)
 
@@ -94,25 +97,40 @@ def print_available_airports():
 
         if bearing >= -22.5 and bearing < 22.5:
             direction = 'North'
+            direction_groups[0].append(airport)
         elif bearing >= 22.5 and bearing < 67.5:
             direction = 'North-West'
+            direction_groups[1].append(airport)
         elif bearing >= 67.5 and bearing < 112.5:
             direction = 'West'
+            direction_groups[2].append(airport)
         elif bearing >= 112.5 and bearing < 157.5:
             direction = 'South-West'
+            direction_groups[3].append(airport)
         elif bearing >= 157.5 or bearing < -157.5:
             direction = 'South'
+            direction_groups[4].append(airport)
         elif bearing >= -157.5 and bearing < -112.5:
             direction = 'South-East'
+            direction_groups[5].append(airport)
         elif bearing >= -112.5 and bearing < -67.5:
             direction = 'East'
+            direction_groups[6].append(airport)
         elif bearing >= -67.5 and bearing < -22.5:
             direction = 'North-East'
+            direction_groups[7].append(airport)
         else:
             direction = 'Unknown direction'
 
-        print(f"{str(i + 1)}: {airport['airport_name']}, {airport['type']} in {airport['country_name']} - "
-              f"{get_distance(curr['lat'], curr['long'], airport['lat'], airport['long']):.1f} km"
+    sorted = []
+    for group in direction_groups:
+        for airport in group:
+            sorted.append(airport)
+
+    # Print available airports
+    for i, airport in enumerate(sorted):
+        print(f"{str(i + 1)}: {airport['airport_name']}, in {airport['country_name']} - "
+              f"{get_distance(curr['lat'], curr['long'], airport['lat'], airport['long']):.1f} km away"
               f" to the {direction}.")
 
 # initialize start and end locations, calculate distance
@@ -121,7 +139,7 @@ curr = generate_random_location()
 dest = generate_random_location()
 dist = get_distance(curr["lat"], curr["long"], dest["lat"], dest["long"])
 
-while dest == curr or (dist > 2000):
+while dest == curr or (dist > 6000 or dist < 3000):
     dest = generate_random_location()
     dist = get_distance(curr["lat"], curr["long"], dest["lat"], dest["long"])
 
@@ -138,7 +156,7 @@ while curr['ident'] != dest['ident']:
     index = int(input("\nEnter the index of the airport you want to go to: ")) - 1
 
     while index >= len(airports) or index < 0:
-        print(f"Your input is invalid. Please type a number between 0 and {len(airports)}")
+        print(f"Your input is invalid. Please, type number between 0 and {len(airports)}")
         index = int(input("\nEnter the index of the airport you want to go to: ")) - 1
 
     temp_dest = tuple_to_dict(airports[index])
@@ -162,5 +180,5 @@ while curr['ident'] != dest['ident']:
     time.sleep(0.3)
     print("\r               >", end="")
     time.sleep(0.3)
-print(f"\nCongratulations! You made it to your destination, {dest[airport_name]}.\n"
-      f"It took you {turns_total} turns and {km_total:.1f} km in total.")
+print(f"Congratulations! You made it to your destination at {dest}.\n"
+      f"It took you {turns_total} turns and {km_total} km in total.")
