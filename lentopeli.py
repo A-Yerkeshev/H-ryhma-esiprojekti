@@ -1,5 +1,6 @@
 from geopy import distance
 import mysql.connector
+import time
 
 yhteys = mysql.connector.connect(
     host='127.0.0.1',
@@ -11,6 +12,8 @@ yhteys = mysql.connector.connect(
 )
 
 airports = []
+flight_compare = ""
+temp_dest = ""
 turns_total = 0
 km_total = 0
 dist_by_type = {
@@ -78,16 +81,12 @@ def fetch_available_airports(curr_lat, curr_long, dest_lat, dest_long, type):
     for entry in result:
         airports.append(entry)
 
-
 def print_available_airports():
     for i, airport in enumerate(airports):
-        print(str(i) + ' : ' + str(airport))
-
-
-def move(index):
-    global curr
-    curr = tuple_to_dict(airports[index])
-
+        global curr
+        airport = tuple_to_dict(airport)
+        print(f"{str(i + 1)}: {airport['airport_name']}, {airport['country_name']} - "
+              f"{get_distance(curr['lat'], curr['long'], airport['lat'], airport['long']):.1f} km away")
 
 # initialize start and end locations, calculate distance
 check_if_arrived = False
@@ -100,12 +99,12 @@ while dest == curr or (dist > 6000 or dist < 3000):
     dist = get_distance(curr["lat"], curr["long"], dest["lat"], dest["long"])
 
 # Start the game
-print(f"Your current location is '{curr['airport_name']}' in {curr['country_name']}"
+while curr['ident'] != dest['ident']:
+    print(f"\nYour current location is '{curr['airport_name']}' in {curr['country_name']}"
     f"\nYour destination is '{dest['airport_name']}' in {dest['country_name']}."
-    f"\nThe destination is {dist:.0f} kilometers away."
+    f"\nThe destination is {dist:.0f} km away."
         f"\nYou are currently in a {curr['type']}.")
 
-while curr['ident'] != dest['ident']:
     input("\nPress 'Enter' to fetch the nearest airports.")
     fetch_available_airports(curr["lat"], curr["long"], dest["lat"], dest["long"], curr["type"])
     print_available_airports()
@@ -116,6 +115,26 @@ while curr['ident'] != dest['ident']:
         print(f"Your input is invalid. Please, type number between 0 and {len(airports)}")
         index = int(input("\nEnter the index of the airport you want to go to: "))
 
-    move(index)
-    print(f"You fly {get_distance(curr['lat'], curr['long'], dest['lat'], dest['long']):.0f} km")
-    print(f"Your new location is '{curr['airport_name']}' in {curr['country_name']}")
+    temp_dest = tuple_to_dict(airports[index])
+    flight = get_distance(curr['lat'], curr['long'], temp_dest['lat'], temp_dest['long'])
+    flight_compare = get_distance(temp_dest['lat'], temp_dest['long'], dest['lat'], dest['long'])
+    if dist > flight_compare:
+        dist = dist - flight
+    elif dist < flight:
+        dist = dist + flight
+    else:
+        dist = dist - flight
+    turns_total = turns_total + 1
+    km_total = km_total + flight
+    curr = tuple_to_dict(airports[index])
+    print(f"\nYou fly {flight:.1f} km to {curr['airport_name']}.")
+    print("\r>", end="")
+    time.sleep(1)
+    print("\r----->", end="")
+    time.sleep(0.8)
+    print("\r---------->", end="")
+    time.sleep(0.8)
+    print("\r      --------->", end="")
+    time.sleep(0.8)
+    print("\r               >", end="")
+    time.sleep(1)
