@@ -9,7 +9,7 @@ yhteys = mysql.connector.connect(
     port=3306,
     database='flight_game',
     user='root',
-    password='toast',
+    password='Cassandra-580',
     autocommit=False
 )
 
@@ -80,15 +80,12 @@ def fetch_available_airports(curr_lat, curr_long, dest_lat, dest_long, type):
     cursor.execute(sql)
     result = cursor.fetchall()
     airports.clear()
-    for entry in result:
-        airports.append(entry)
 
-def print_available_airports():
     # Order airports by direction
     direction_groups = [[], [], [], [], [], [], [], []]
 
-    for i, airport in enumerate(airports):
-        airport = tuple_to_dict(airport)
+    for entry in result:
+        airport = tuple_to_dict(entry)
 
         # Calculate in which direction airport is located
         x = math.cos(airport['lat'])*math.sin(airport['long']-curr['long'])
@@ -96,42 +93,41 @@ def print_available_airports():
         bearing = math.degrees(math.atan2(x,y))
 
         if bearing >= -22.5 and bearing < 22.5:
-            direction = 'North'
+            airport['direction'] = 'North'
             direction_groups[0].append(airport)
         elif bearing >= 22.5 and bearing < 67.5:
-            direction = 'North-West'
+            airport['direction'] = 'North-West'
             direction_groups[1].append(airport)
         elif bearing >= 67.5 and bearing < 112.5:
-            direction = 'West'
+            airport['direction'] = 'West'
             direction_groups[2].append(airport)
         elif bearing >= 112.5 and bearing < 157.5:
-            direction = 'South-West'
+            airport['direction'] = 'South-West'
             direction_groups[3].append(airport)
         elif bearing >= 157.5 or bearing < -157.5:
-            direction = 'South'
+            airport['direction'] = 'South'
             direction_groups[4].append(airport)
         elif bearing >= -157.5 and bearing < -112.5:
-            direction = 'South-East'
+            airport['direction'] = 'South-East'
             direction_groups[5].append(airport)
         elif bearing >= -112.5 and bearing < -67.5:
-            direction = 'East'
+            airport['direction'] = 'East'
             direction_groups[6].append(airport)
         elif bearing >= -67.5 and bearing < -22.5:
-            direction = 'North-East'
+            airport['direction'] = 'North-East'
             direction_groups[7].append(airport)
         else:
-            direction = 'Unknown direction'
+            airport['direction'] = 'Unknown direction'
 
-    sorted = []
     for group in direction_groups:
         for airport in group:
-            sorted.append(airport)
+            airports.append(airport)
 
-    # Print available airports
-    for i, airport in enumerate(sorted):
+def print_available_airports():
+    for i, airport in enumerate(airports):
         print(f"{str(i + 1)}: {airport['airport_name']}, in {airport['country_name']} - "
               f"{get_distance(curr['lat'], curr['long'], airport['lat'], airport['long']):.1f} km away"
-              f" to the {direction}.")
+              f" to the {airport['direction']}.")
 
 # initialize start and end locations, calculate distance
 check_if_arrived = False
@@ -159,7 +155,7 @@ while curr['ident'] != dest['ident']:
         print(f"Your input is invalid. Please type a number between 0 and {len(airports)}")
         index = int(input("\nEnter the index of the airport you want to go to: ")) - 1
 
-    temp_dest = tuple_to_dict(airports[index])
+    temp_dest = airports[index]
     flight = get_distance(curr['lat'], curr['long'], temp_dest['lat'], temp_dest['long'])
     flight_compare = get_distance(temp_dest['lat'], temp_dest['long'], dest['lat'], dest['long'])
     if dist > flight_compare:
@@ -168,7 +164,7 @@ while curr['ident'] != dest['ident']:
         dist = dist + flight
     turns_total = turns_total + 1
     km_total = km_total + flight
-    curr = tuple_to_dict(airports[index])
+    curr = airports[index]
     print(f"\nYou fly {flight:.1f} km to {curr['airport_name']}.")
     print("\r>", end="")
     time.sleep(0.3)
