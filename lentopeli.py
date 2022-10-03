@@ -9,7 +9,7 @@ yhteys = mysql.connector.connect(
     port=3306,
     database='flight_game',
     user='root',
-    password='Cassandra-580',
+    password='toast',
     autocommit=False
 )
 
@@ -87,16 +87,33 @@ def print_available_airports():
     for i, airport in enumerate(airports):
         airport = tuple_to_dict(airport)
 
+        # Calculate in which direction airport is located
         x = math.cos(airport['lat'])*math.sin(airport['long']-curr['long'])
         y = math.cos(curr['lat'])*math.sin(airport['lat'])-math.sin(curr['lat'])*math.cos(airport['lat'])*math.cos(airport['long']-curr['long'])
         bearing = math.degrees(math.atan2(x,y))
 
-        if bearing > 0:
-            direction = 'East'
-        else:
+        if bearing >= -22.5 and bearing < 22.5:
+            direction = 'North'
+        elif bearing >= 22.5 and bearing < 67.5:
+            direction = 'North-West'
+        elif bearing >= 67.5 and bearing < 112.5:
             direction = 'West'
+        elif bearing >= 112.5 and bearing < 157.5:
+            direction = 'South-West'
+        elif bearing >= 157.5 or bearing < -157.5:
+            direction = 'South'
+        elif bearing >= -157.5 and bearing < -112.5:
+            direction = 'South-East'
+        elif bearing >= -112.5 and bearing < -67.5:
+            direction = 'East'
+        elif bearing >= -67.5 and bearing < -22.5:
+            direction = 'North-East'
+        else:
+            direction = 'Unknown direction'
 
-        print(str(i) + ' : ' + airport['airport_name'] + ' : ' + direction)
+        print(f"{str(i + 1)}: {airport['airport_name']}, in {airport['country_name']} - "
+              f"{get_distance(curr['lat'], curr['long'], airport['lat'], airport['long']):.1f} km away"
+              f" in {direction} direction.")
 
 
 def move(index):
@@ -118,10 +135,9 @@ while dest == curr or (dist > 6000 or dist < 3000):
 
 # Start the game
 while curr['ident'] != dest['ident']:
-    print(f"\nYour current location is '{curr['airport_name']}' in {curr['country_name']}"
+    print(f"\nYour current location is '{curr['airport_name']}', {curr['type']} in {curr['country_name']}"
     f"\nYour destination is '{dest['airport_name']}' in {dest['country_name']}."
-    f"\nThe destination is {dist:.0f} km away."
-        f"\nYou are currently in a {curr['type']}.")
+    f"\nThe destination is {dist:.0f} km away.")
 
     input("\nPress 'Enter' to fetch the nearest airports.")
     fetch_available_airports(curr["lat"], curr["long"], dest["lat"], dest["long"], curr["type"])
