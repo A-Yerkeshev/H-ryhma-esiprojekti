@@ -1,12 +1,13 @@
 from geopy import distance
 import mysql.connector
+import math
 
 yhteys = mysql.connector.connect(
     host='127.0.0.1',
     port=3306,
     database='flight_game',
     user='root',
-    password='toast',
+    password='Cassandra-580',
     autocommit=False
 )
 
@@ -70,7 +71,7 @@ def fetch_available_airports(curr_lat, curr_long, dest_lat, dest_long, type):
     cos(RADIANS(longitude_deg) - RADIANS({curr_long}))) * 1.609344 <= {radius_km}
     AND type != 'closed'
     AND ident != '{curr["ident"]}'
-    AND country.iso_country = airport.iso_country LIMIT 10;"""
+    AND country.iso_country = airport.iso_country LIMIT 25;"""
     cursor = yhteys.cursor()
     cursor.execute(sql)
     result = cursor.fetchall()
@@ -81,7 +82,18 @@ def fetch_available_airports(curr_lat, curr_long, dest_lat, dest_long, type):
 
 def print_available_airports():
     for i, airport in enumerate(airports):
-        print(str(i) + ' : ' + str(airport))
+        airport = tuple_to_dict(airport)
+
+        x = math.cos(airport['lat'])*math.sin(airport['long']-curr['long'])
+        y = math.cos(curr['lat'])*math.sin(airport['lat'])-math.sin(curr['lat'])*math.cos(airport['lat'])*math.cos(airport['long']-curr['long'])
+        bearing = math.degrees(math.atan2(x,y))
+
+        if bearing > 0:
+            direction = 'East'
+        else:
+            direction = 'West'
+
+        print(str(i) + ' : ' + airport['airport_name'] + ' : ' + direction)
 
 
 def move(index):
