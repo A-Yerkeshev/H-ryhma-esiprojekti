@@ -1,6 +1,8 @@
 from geopy import distance
 import mysql.connector
+import math
 import time
+
 
 yhteys = mysql.connector.connect(
     host='127.0.0.1',
@@ -73,7 +75,7 @@ def fetch_available_airports(curr_lat, curr_long, dest_lat, dest_long, type):
     cos(RADIANS(longitude_deg) - RADIANS({curr_long}))) * 1.609344 <= {radius_km}
     AND type != 'closed'
     AND ident != '{curr["ident"]}'
-    AND country.iso_country = airport.iso_country LIMIT 10;"""
+    AND country.iso_country = airport.iso_country LIMIT 25;"""
     cursor = yhteys.cursor()
     cursor.execute(sql)
     result = cursor.fetchall()
@@ -83,10 +85,43 @@ def fetch_available_airports(curr_lat, curr_long, dest_lat, dest_long, type):
 
 def print_available_airports():
     for i, airport in enumerate(airports):
-        global curr
         airport = tuple_to_dict(airport)
-        print(f"{str(i + 1)}: {airport['airport_name']}, {airport['country_name']} - "
-              f"{get_distance(curr['lat'], curr['long'], airport['lat'], airport['long']):.1f} km away")
+
+        # Calculate in which direction airport is located
+        x = math.cos(airport['lat'])*math.sin(airport['long']-curr['long'])
+        y = math.cos(curr['lat'])*math.sin(airport['lat'])-math.sin(curr['lat'])*math.cos(airport['lat'])*math.cos(airport['long']-curr['long'])
+        bearing = math.degrees(math.atan2(x,y))
+
+        if bearing >= -22.5 and bearing < 22.5:
+            direction = 'North'
+        elif bearing >= 22.5 and bearing < 67.5:
+            direction = 'North-West'
+        elif bearing >= 67.5 and bearing < 112.5:
+            direction = 'West'
+        elif bearing >= 112.5 and bearing < 157.5:
+            direction = 'South-West'
+        elif bearing >= 157.5 or bearing < -157.5:
+            direction = 'South'
+        elif bearing >= -157.5 and bearing < -112.5:
+            direction = 'South-East'
+        elif bearing >= -112.5 and bearing < -67.5:
+            direction = 'East'
+        elif bearing >= -67.5 and bearing < -22.5:
+            direction = 'North-East'
+        else:
+            direction = 'Unknown direction'
+
+        print(f"{str(i + 1)}: {airport['airport_name']}, in {airport['country_name']} - "
+              f"{get_distance(curr['lat'], curr['long'], airport['lat'], airport['long']):.1f} km away"
+              f" in {direction} direction.")
+
+
+def move(index):
+    global curr
+    curr = tuple_to_dict(airports[index])
+    airport = tuple_to_dict(airport)
+    print(f"{str(i + 1)}: {airport['airport_name']}, {airport['country_name']} - "
+            f"{get_distance(curr['lat'], curr['long'], airport['lat'], airport['long']):.1f} km away")
 
 # initialize start and end locations, calculate distance
 check_if_arrived = False
@@ -100,10 +135,9 @@ while dest == curr or (dist > 6000 or dist < 3000):
 
 # Start the game
 while curr['ident'] != dest['ident']:
-    print(f"\nYour current location is '{curr['airport_name']}' in {curr['country_name']}"
+    print(f"\nYour current location is '{curr['airport_name']}', {curr['type']} in {curr['country_name']}"
     f"\nYour destination is '{dest['airport_name']}' in {dest['country_name']}."
-    f"\nThe destination is {dist:.0f} km away."
-        f"\nYou are currently in a {curr['type']}.")
+    f"\nThe destination is {dist:.0f} km away.")
 
     input("\nPress 'Enter' to fetch the nearest airports.")
     fetch_available_airports(curr["lat"], curr["long"], dest["lat"], dest["long"], curr["type"])
@@ -127,14 +161,12 @@ while curr['ident'] != dest['ident']:
     curr = tuple_to_dict(airports[index])
     print(f"\nYou fly {flight:.1f} km to {curr['airport_name']}.")
     print("\r>", end="")
-    time.sleep(1)
+    time.sleep(0.2)
     print("\r----->", end="")
-    time.sleep(0.8)
+    time.sleep(0.2)
     print("\r---------->", end="")
-    time.sleep(0.8)
+    time.sleep(0.2)
     print("\r      --------->", end="")
-    time.sleep(0.8)
+    time.sleep(0.2)
     print("\r               >", end="")
-    time.sleep(1)
-print(f"Congratulations! You made it to your destination at {dest}.\n"
-      f"It took you {turns_total} turns and {km_total} km in total.")
+    time.sleep(0.2)
