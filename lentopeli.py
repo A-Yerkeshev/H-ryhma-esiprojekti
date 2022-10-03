@@ -22,9 +22,9 @@ dist_by_type = {
     "closed": 0,
     "balloonport": 10,
     "heliport": 50,
-    "small_airport": 100,
-    "medium_airport": 200,
-    "large_airport": 500,
+    "small_airport": 200,
+    "medium_airport": 400,
+    "large_airport": 1000,
     "seaplane_base": 100
 }
 
@@ -143,21 +143,19 @@ while curr['ident'] != dest['ident']:
     fetch_available_airports(curr["lat"], curr["long"], dest["lat"], dest["long"], curr["type"])
     print_available_airports()
 
-    index = int(input("\nEnter the index of the airport you want to go to: "))
+    index = int(input("\nEnter the index of the airport you want to go to: ")) - 1
 
     while index >= len(airports) or index < 0:
         print(f"Your input is invalid. Please, type number between 0 and {len(airports)}")
-        index = int(input("\nEnter the index of the airport you want to go to: "))
+        index = int(input("\nEnter the index of the airport you want to go to: ")) - 1
 
     temp_dest = tuple_to_dict(airports[index])
     flight = get_distance(curr['lat'], curr['long'], temp_dest['lat'], temp_dest['long'])
     flight_compare = get_distance(temp_dest['lat'], temp_dest['long'], dest['lat'], dest['long'])
     if dist > flight_compare:
         dist = dist - flight
-    elif dist < flight:
-        dist = dist + flight
     else:
-        dist = dist - flight
+        dist = dist + flight
     turns_total = turns_total + 1
     km_total = km_total + flight
     curr = tuple_to_dict(airports[index])
