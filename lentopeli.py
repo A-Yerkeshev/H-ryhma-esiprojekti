@@ -128,9 +128,7 @@ def fetch_available_airports(curr_lat, curr_long, type):
 
 def print_available_airports():
     for i, airport in enumerate(airports):
-        print(f"{str(i + 1)}: {airport['airport_name']}, {airport['type']} in {airport['country_name']} - "
-              f"{get_distance(curr['lat'], curr['long'], airport['lat'], airport['long']):.1f} km"
-              f" to the {airport['direction']}.")
+        print(f"{str(i + 1)+':':<5} {airport['airport_name'][0:49]+',':<50} {airport['type']:<15} {'in ' + airport['country_name'][0:22]:<25} {str(round(get_distance(curr['lat'], curr['long'], airport['lat'], airport['long']), 2))+' km':<15} {'to the '+airport['direction']+'.'}")
 
 
 # initialize start and end locations, calculate distance
@@ -156,7 +154,7 @@ while curr['ident'] != dest['ident']:
     index = int(input("\nEnter the index of the airport you want to fly to: ")) - 1
 
     while index >= len(airports) or index < 0:
-        print(f"Your input is invalid. Please type a number between 0 and {len(airports)}")
+        print(f"Your input is invalid. Please type a number between 1 and {len(airports)}")
         index = int(input("\nEnter the index of the airport you want to fly to: ")) - 1
 
     temp_dest = airports[index]
