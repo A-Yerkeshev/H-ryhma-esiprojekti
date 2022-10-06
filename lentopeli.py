@@ -8,7 +8,7 @@ yhteys = mysql.connector.connect(
     port=3306,
     database='flight_game',
     user='root',
-    password='toast',
+    password='pass',
     autocommit=False
 )
 
@@ -128,8 +128,10 @@ def fetch_available_airports(curr_lat, curr_long, type):
 
 def print_available_airports():
     for i, airport in enumerate(airports):
-        print(
-            f"{str(i + 1) + ':':<5} {airport['airport_name'][0:49] + ',':<50} {airport['type']:<15} {airport['country_name'][0:22]:<25} {str(round(get_distance(curr['lat'], curr['long'], airport['lat'], airport['long']), 2)) + ' km':<15} {airport['direction']}")
+        print(f"{str(i + 1) + ':':<5} {airport['airport_name'][0:49] + ',':<45}"
+              f" {airport['type']:<20} {airport['country_name'][0:22]:<25}"
+              f" {str(round(get_distance(curr['lat'], curr['long'], airport['lat'], airport['long']), 2)) + ' km':<15}"
+              f" {airport['direction']}")
 
 
 # initialize start and end locations, calculate distance
