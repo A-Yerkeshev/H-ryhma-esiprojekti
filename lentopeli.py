@@ -8,7 +8,7 @@ yhteys = mysql.connector.connect(
     port=3306,
     database='flight_game',
     user='root',
-    password='pass',
+    password='Cassandra-580',
     autocommit=False
 )
 
@@ -134,48 +134,14 @@ def print_available_airports():
               f" {airport['direction']}")
 
 def print_results():
+    global turns_total, km_total, dest
     # 1CO2 gramm = 1km*90gr/km
     print(f"\nCongratulations! You made it to your destination, {dest['airport_name']}.\n"
         f"It took you {turns_total} turns and {km_total:.1f} km in total.\n"
         f"Your trip emitted {km_total*90:.1f} gramms of CO2")
 
-
-# initialize start and end locations, calculate distance
-curr = generate_random_location()
-dest = generate_random_location()
-dist = get_distance(curr["lat"], curr["long"], dest["lat"], dest["long"])
-
-while dest == curr or (dist > 4000 or dist < 1500):
-    dest = generate_random_location()
-    dist = get_distance(curr["lat"], curr["long"], dest["lat"], dest["long"])
-
-# Start the game
-while curr['ident'] != dest['ident']:
-    print(f"\nYour current location is '{curr['airport_name']}', {curr['type']} in {curr['country_name']}"
-          f"\nYour destination is '{dest['airport_name']}' in {dest['country_name']}."
-          f"\nThe destination is {dist:.0f} km away.")
-
-    input("\nPress 'Enter' to fetch the nearest airports.")
-    fetch_available_airports(curr["lat"], curr["long"], curr["type"])
-    print_available_airports()
-
-    index = input("\nEnter the index of the airport you want to fly to: ")
-
-    while not index.isdigit() or (int(index) >= len(airports) or int(index) < 1):
-        print(f"Your input is invalid. Please type a number from 1 to {len(airports)}")
-        index = input("\nEnter the index of the airport you want to fly to: ")
-
-    index = int(index) - 1
-
-    temp_dest = airports[index]
-    flight = get_distance(curr['lat'], curr['long'], temp_dest['lat'], temp_dest['long'])
-    flight_compare = get_distance(temp_dest['lat'], temp_dest['long'], dest['lat'], dest['long'])
-    if dist > flight_compare:
-        dist = dist - flight
-        if dist < 0:
-            dist = dist * -1
-    else:
-        dist = dist + flight
+def move(index, flight):
+    global curr, turns_total, km_total
     turns_total = turns_total + 1
     km_total = km_total + flight
     curr = airports[index]
@@ -190,4 +156,46 @@ while curr['ident'] != dest['ident']:
     time.sleep(0.2)
     print("\r               >", end="")
     time.sleep(0.3)
-    print_results()
+
+
+# initialize start and end locations, calculate distance
+curr = generate_random_location()
+dest = generate_random_location()
+dist = get_distance(curr["lat"], curr["long"], dest["lat"], dest["long"])
+
+while dest == curr or (dist > 4000 or dist < 1500):
+    dest = generate_random_location()
+    dist = get_distance(curr["lat"], curr["long"], dest["lat"], dest["long"])
+
+# Start the game
+while curr['ident'] != dest['ident']:
+    # Inform player about his current position and destination
+    print(f"\nYour current location is '{curr['airport_name']}', {curr['type']} in {curr['country_name']}"
+          f"\nYour destination is '{dest['airport_name']}' in {dest['country_name']}."
+          f"\nThe destination is {dist:.0f} km away.")
+
+    # Fetch and display airports within the reach of current location
+    input("\nPress 'Enter' to fetch the nearest airports.")
+    fetch_available_airports(curr["lat"], curr["long"], curr["type"])
+    print_available_airports()
+
+    # Ask player for airport index while input is valid
+    index = input("\nEnter the index of the airport you want to fly to: ")
+    while not index.isdigit() or (int(index) >= len(airports) or int(index) < 1):
+        print(f"Your input is invalid. Please type a number from 1 to {len(airports)}")
+        index = input("\nEnter the index of the airport you want to fly to: ")
+    index = int(index) - 1
+
+    temp_dest = airports[index]
+    flight = get_distance(curr['lat'], curr['long'], temp_dest['lat'], temp_dest['long'])
+    flight_compare = get_distance(temp_dest['lat'], temp_dest['long'], dest['lat'], dest['long'])
+    if dist > flight_compare:
+        dist = dist - flight
+        if dist < 0:
+            dist = dist * -1
+    else:
+        dist = dist + flight
+
+    move(index, flight)
+print_results()
+yhteys.close()
