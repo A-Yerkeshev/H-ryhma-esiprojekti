@@ -130,9 +130,14 @@ def print_available_airports():
     for i, airport in enumerate(airports):
         print(f"{str(i + 1)+':':<5} {airport['airport_name'][0:49]+',':<50} {airport['type']:<15} {'in ' + airport['country_name'][0:22]:<25} {str(round(get_distance(curr['lat'], curr['long'], airport['lat'], airport['long']), 2))+' km':<15} {'to the '+airport['direction']+'.'}")
 
+def print_results():
+    # 1CO2 gramm = 1km*90gr/km
+    print(f"\nCongratulations! You made it to your destination, {dest['airport_name']}.\n"
+        f"It took you {turns_total} turns and {km_total:.1f} km in total.\n"
+        f"Your trip emitted {km_total*90:.1f} gramms of CO2")
+
 
 # initialize start and end locations, calculate distance
-check_if_arrived = False
 curr = generate_random_location()
 dest = generate_random_location()
 dist = get_distance(curr["lat"], curr["long"], dest["lat"], dest["long"])
@@ -180,5 +185,4 @@ while curr['ident'] != dest['ident']:
     time.sleep(0.2)
     print("\r               >", end="")
     time.sleep(0.3)
-print(f"\nCongratulations! You made it to your destination, {dest['airport_name']}.\n"
-      f"It took you {turns_total} turns and {km_total:.1f} km in total.")
+    print_results()
