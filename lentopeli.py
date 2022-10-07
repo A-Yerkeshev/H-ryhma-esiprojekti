@@ -168,7 +168,8 @@ def print_starting_message():
         f"\n{'From seaplane_base you can fly':<35} {dist_by_type['seaplane_base']} km"
         f"\n{'From small_airport you can fly':<35} {dist_by_type['small_airport']} km"
         f"\n{'From medium_airport you can fly':<35} {dist_by_type['medium_airport']} km"
-        f"\n{'From large_airport you can fly all':<35} {dist_by_type['large_airport']} km")
+        f"\n{'From large_airport you can fly all':<35} {dist_by_type['large_airport']} km"
+        "Find the right direction and fly to as large and as far airports as possible.")
     print("""
 
              -=\`\`
