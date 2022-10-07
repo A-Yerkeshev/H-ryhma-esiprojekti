@@ -67,8 +67,7 @@ def fetch_available_airports(curr_lat, curr_long, type):
     else:
         raise Exception(f"Airport type '{type}' is invalid.")
 
-    # Select all airports within the reach of current location,
-    # based on airport type, order by ones closest to destination
+    # Select all airports within the reach of current location, based on airport type
     # Distance = 3963.0 * arccos[(sin(lat1) * sin(lat2)) + cos(lat1) * cos(lat2) * cos(long2 – long1)] * 1.609344
     sql = f"""SELECT ident, airport.name, country.name, type, latitude_deg, longitude_deg FROM airport, country
     WHERE 3963.0 * acos((sin(RADIANS({curr_lat})) * sin(RADIANS(latitude_deg))) +
@@ -161,6 +160,26 @@ def move(index, flight):
     print("\r               >", end="")
     time.sleep(0.3)
 
+def print_starting_message():
+    print("Welcome to H group flight game. Your goal is to reach given destination in as less turns as possible."
+        "\nThe range where you can fly is determined by your current airport's type"
+        f"\n{'From balloonport you can fly only':<35} {dist_by_type['balloonport']} km"
+        f"\n{'From heliport you can fly':<35} {dist_by_type['heliport']} km"
+        f"\n{'From seaplane_base you can fly':<35} {dist_by_type['seaplane_base']} km"
+        f"\n{'From small_airport you can fly':<35} {dist_by_type['small_airport']} km"
+        f"\n{'From medium_airport you can fly':<35} {dist_by_type['medium_airport']} km"
+        f"\n{'From large_airport you can fly all':<35} {dist_by_type['large_airport']} km")
+    print("""
+
+             -=\`\`
+                \`\`
+     |\ _________\_\__
+   -=\c`oo oo oo ooo o`)
+      `~~~~~~~~~~/ /~~`
+                / /
+            -==/ /
+              '-'
+          """)
 
 # initialize start and end locations, calculate distance
 curr = generate_random_location()
@@ -172,6 +191,8 @@ while dest == curr or (dist > 4000 or dist < 1500):
     dist = get_distance(curr["lat"], curr["long"], dest["lat"], dest["long"])
 
 # Start the game
+print_starting_message()
+
 while curr['ident'] != dest['ident']:
     # Inform player about his current position and destination
     print(f"\nYour current location is '{curr['airport_name']}', {curr['type']} in {curr['country_name']}"
@@ -185,7 +206,7 @@ while curr['ident'] != dest['ident']:
 
     # Ask player for airport index while input is invalid
     index = input("\nEnter the index of the airport you want to fly to: ")
-    while not index.isdigit() or (int(index) >= len(airports) or int(index) < 1):
+    while not index.isdigit() or (int(index) >= len(airports)+1 or int(index) < 1):
         print(f"Your input is invalid. Please type a number from 1 to {len(airports)}")
         index = input("\nEnter the index of the airport you want to fly to: ")
     index = int(index) - 1
