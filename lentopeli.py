@@ -61,7 +61,6 @@ def tuple_to_dict(tuple):
 
 def fetch_available_airports(curr_lat, curr_long, type):
     # Define flight radius based on airport type
-    radius_km = None
     if type in dist_by_type:
         radius_km = dist_by_type[type]
     else:
@@ -89,12 +88,12 @@ def fetch_available_airports(curr_lat, curr_long, type):
 
         # Calculate in which direction airport is located
         x = (math.cos(math.radians(airport['lat'])) *
-            math.sin(math.radians(airport['long'] - curr['long'])))
+             math.sin(math.radians(airport['long'] - curr['long'])))
         y = (math.cos(math.radians(curr['lat'])) *
-            math.sin(math.radians(airport['lat'])) -
-            math.sin(math.radians(curr['lat'])) *
-            math.cos(math.radians(airport['lat'])) *
-            math.cos(math.radians(airport['long'] - curr['long'])))
+             math.sin(math.radians(airport['lat'])) -
+             math.sin(math.radians(curr['lat'])) *
+             math.cos(math.radians(airport['lat'])) *
+             math.cos(math.radians(airport['long'] - curr['long'])))
         bearing = math.degrees(math.atan2(x, y))
 
         if bearing >= -22.5 and bearing < 22.5:
@@ -132,20 +131,22 @@ def fetch_available_airports(curr_lat, curr_long, type):
 def print_available_airports():
     global dest
     for i, airport in enumerate(airports):
-        if (airport['ident'] == dest['ident']):
-            print("V"*15 + "   YOUR DESTINATION   " + "V"*15)
+        if airport['ident'] == dest['ident']:
+            print("V" * 15 + "   YOUR DESTINATION   " + "V" * 15)
 
         print(f"{str(i + 1) + ':':<5} {airport['airport_name'][0:43] + ',':<45}"
               f" {airport['type']:<20} {airport['country_name'][0:23]:<25}"
               f" {str(round(get_distance(curr['lat'], curr['long'], airport['lat'], airport['long']), 2)) + ' km':<15}"
               f" {airport['direction']}")
 
+
 def print_results():
     global turns_total, km_total, dest
-    # 1CO2 gramm = 1km*90gr/km
+    # One CO2 gram = 1km * 90gr/km
     print(f"\nCongratulations! You made it to your destination, {dest['airport_name']}.\n"
-        f"It took you {turns_total} turns and {km_total:.1f} km in total.\n"
-        f"Your trip emitted {km_total*90:.1f} gramms of CO2")
+          f"It took you {turns_total} turns and {km_total:.1f} km in total.\n"
+          f"Your trip emitted {km_total * 90:.1f} grams of CO2.")
+
 
 def move(index, flight):
     global curr, turns_total, km_total
@@ -164,16 +165,17 @@ def move(index, flight):
     print("\r               >", end="")
     time.sleep(0.3)
 
+
 def print_starting_message():
-    print("Welcome to H group flight game. Your goal is to reach given destination in as less turns as possible."
-        "\nThe range where you can fly is determined by your current airport's type"
-        f"\n{'From balloonport you can fly only':<35} {dist_by_type['balloonport']} km"
-        f"\n{'From heliport you can fly':<35} {dist_by_type['heliport']} km"
-        f"\n{'From seaplane_base you can fly':<35} {dist_by_type['seaplane_base']} km"
-        f"\n{'From small_airport you can fly':<35} {dist_by_type['small_airport']} km"
-        f"\n{'From medium_airport you can fly':<35} {dist_by_type['medium_airport']} km"
-        f"\n{'From large_airport you can fly all':<35} {dist_by_type['large_airport']} km"
-        "\nFind the right direction and fly to as large and as far airports as possible.")
+    print("Welcome to Group H's flight game. Your goal is to reach the given destination in as few turns as possible."
+          "\n\nThe range where you can fly is determined by your current airport's type:"
+          f"\n{'From balloon ports you can only fly':<35} {dist_by_type['balloonport']} km"
+          f"\n{'From heliports you can fly':<35} {dist_by_type['heliport']} km"
+          f"\n{'From seaplane bases you can fly':<35} {dist_by_type['seaplane_base']} km"
+          f"\n{'From small airports you can fly':<35} {dist_by_type['small_airport']} km"
+          f"\n{'From medium airports you can fly':<35} {dist_by_type['medium_airport']} km"
+          f"\n{'Large airports allow a whopping':<35} {dist_by_type['large_airport']} km\n"
+          "\nFind the right direction and fly to as large and as far away airports you can.")
     print("""
 
              -=\`\`
@@ -185,6 +187,7 @@ def print_starting_message():
             -==/ /
               '-'
           """)
+
 
 # initialize start and end locations, calculate distance
 curr = generate_random_location()
@@ -211,7 +214,7 @@ while curr['ident'] != dest['ident']:
 
     # Ask player for airport index while input is invalid
     index = input("\nEnter the index of the airport you want to fly to: ")
-    while not index.isdigit() or (int(index) >= len(airports)+1 or int(index) < 1):
+    while not index.isdigit() or (int(index) >= len(airports) + 1 or int(index) < 1):
         print(f"Your input is invalid. Please type a number from 1 to {len(airports)}")
         index = input("\nEnter the index of the airport you want to fly to: ")
     index = int(index) - 1
@@ -222,7 +225,7 @@ while curr['ident'] != dest['ident']:
 
     dist = get_distance(airports[index]['lat'], airports[index]['long'], dest["lat"], dest["long"])
 
-    if (airport_dist > dest_dist):
+    if airport_dist > dest_dist:
         dist *= -1
 
     move(index, airport_dist)
