@@ -88,34 +88,38 @@ def fetch_available_airports(curr_lat, curr_long, type):
         airport = tuple_to_dict(entry)
 
         # Calculate in which direction airport is located
-        x = math.cos(airport['lat']) * math.sin(airport['long'] - curr['long'])
-        y = math.cos(curr['lat']) * math.sin(airport['lat']) - math.sin(curr['lat']) * math.cos(
-            airport['lat']) * math.cos(airport['long'] - curr['long'])
+        x = (math.cos(math.radians(airport['lat'])) *
+            math.sin(math.radians(airport['long'] - curr['long'])))
+        y = (math.cos(math.radians(curr['lat'])) *
+            math.sin(math.radians(airport['lat'])) -
+            math.sin(math.radians(curr['lat'])) *
+            math.cos(math.radians(airport['lat'])) *
+            math.cos(math.radians(airport['long'] - curr['long'])))
         bearing = math.degrees(math.atan2(x, y))
 
         if bearing >= -22.5 and bearing < 22.5:
             airport['direction'] = 'North'
             direction_groups[0].append(airport)
         elif bearing >= 22.5 and bearing < 67.5:
-            airport['direction'] = 'North-West'
+            airport['direction'] = 'North-East'
             direction_groups[1].append(airport)
         elif bearing >= 67.5 and bearing < 112.5:
-            airport['direction'] = 'West'
+            airport['direction'] = 'East'
             direction_groups[2].append(airport)
         elif bearing >= 112.5 and bearing < 157.5:
-            airport['direction'] = 'South-West'
+            airport['direction'] = 'South-East'
             direction_groups[3].append(airport)
-        elif bearing >= 157.5 or bearing < -157.5:
+        elif bearing < -157.5 or bearing >= 157.5:
             airport['direction'] = 'South'
             direction_groups[4].append(airport)
         elif bearing >= -157.5 and bearing < -112.5:
-            airport['direction'] = 'South-East'
+            airport['direction'] = 'South-West'
             direction_groups[5].append(airport)
         elif bearing >= -112.5 and bearing < -67.5:
-            airport['direction'] = 'East'
+            airport['direction'] = 'West'
             direction_groups[6].append(airport)
         elif bearing >= -67.5 and bearing < -22.5:
-            airport['direction'] = 'North-East'
+            airport['direction'] = 'North-West'
             direction_groups[7].append(airport)
         else:
             airport['direction'] = 'Unknown direction'
@@ -129,10 +133,10 @@ def print_available_airports():
     global dest
     for i, airport in enumerate(airports):
         if (airport['ident'] == dest['ident']):
-            print("V"*15 + "YOUR DESTINATION" + "V"*15)
+            print("V"*15 + "   YOUR DESTINATION   " + "V"*15)
 
-        print(f"{str(i + 1) + ':':<5} {airport['airport_name'][0:49] + ',':<45}"
-              f" {airport['type']:<20} {airport['country_name'][0:22]:<25}"
+        print(f"{str(i + 1) + ':':<5} {airport['airport_name'][0:43] + ',':<45}"
+              f" {airport['type']:<20} {airport['country_name'][0:23]:<25}"
               f" {str(round(get_distance(curr['lat'], curr['long'], airport['lat'], airport['long']), 2)) + ' km':<15}"
               f" {airport['direction']}")
 
@@ -169,7 +173,7 @@ def print_starting_message():
         f"\n{'From small_airport you can fly':<35} {dist_by_type['small_airport']} km"
         f"\n{'From medium_airport you can fly':<35} {dist_by_type['medium_airport']} km"
         f"\n{'From large_airport you can fly all':<35} {dist_by_type['large_airport']} km"
-        "Find the right direction and fly to as large and as far airports as possible.")
+        "\nFind the right direction and fly to as large and as far airports as possible.")
     print("""
 
              -=\`\`
@@ -212,16 +216,16 @@ while curr['ident'] != dest['ident']:
         index = input("\nEnter the index of the airport you want to fly to: ")
     index = int(index) - 1
 
-    temp_dest = airports[index]
-    flight = get_distance(curr['lat'], curr['long'], temp_dest['lat'], temp_dest['long'])
-    flight_compare = get_distance(temp_dest['lat'], temp_dest['long'], dest['lat'], dest['long'])
-    if dist > flight_compare:
-        dist = dist - flight
-        if dist < 0:
-            dist = dist * -1
-    else:
-        dist = dist + flight
+    # Update distance to the destination
+    airport_dist = get_distance(curr['lat'], curr['long'], airports[index]['lat'], airports[index]['long'])
+    dest_dist = get_distance(curr["lat"], curr["long"], dest["lat"], dest["long"])
 
-    move(index, flight)
+    dist = get_distance(airports[index]['lat'], airports[index]['long'], dest["lat"], dest["long"])
+
+    if (airport_dist > dest_dist):
+        dist *= -1
+
+    move(index, airport_dist)
+
 print_results()
 yhteys.close()
