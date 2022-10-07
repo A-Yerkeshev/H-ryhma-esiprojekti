@@ -202,7 +202,7 @@ while dest == curr or (dist > 4000 or dist < 1500):
 print_starting_message()
 
 while curr['ident'] != dest['ident']:
-    # Inform player about his current position and destination
+    # Inform player about their current position and destination
     print(f"\nYour current location is '{curr['airport_name']}', {curr['type']} in {curr['country_name']}"
           f"\nYour destination is '{dest['airport_name']}' in {dest['country_name']}."
           f"\nThe destination is {dist:.0f} km away.")
@@ -212,7 +212,7 @@ while curr['ident'] != dest['ident']:
     fetch_available_airports(curr["lat"], curr["long"], curr["type"])
     print_available_airports()
 
-    # Ask player for airport index while input is invalid
+    # Ask player for airport index and check their input is valid
     index = input("\nEnter the index of the airport you want to fly to: ")
     while not index.isdigit() or (int(index) >= len(airports) + 1 or int(index) < 1):
         print(f"Your input is invalid. Please type a number from 1 to {len(airports)}")
