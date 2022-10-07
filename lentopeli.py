@@ -8,7 +8,7 @@ yhteys = mysql.connector.connect(
     port=3306,
     database='flight_game',
     user='root',
-    password='Cassandra-580',
+    password='toast',
     autocommit=False
 )
 
@@ -127,7 +127,11 @@ def fetch_available_airports(curr_lat, curr_long, type):
 
 
 def print_available_airports():
+    global dest
     for i, airport in enumerate(airports):
+        if (airport['ident'] == dest['ident']):
+            print("V"*15 + "YOUR DESTINATION" + "V"*15)
+
         print(f"{str(i + 1) + ':':<5} {airport['airport_name'][0:49] + ',':<45}"
               f" {airport['type']:<20} {airport['country_name'][0:22]:<25}"
               f" {str(round(get_distance(curr['lat'], curr['long'], airport['lat'], airport['long']), 2)) + ' km':<15}"
@@ -179,7 +183,7 @@ while curr['ident'] != dest['ident']:
     fetch_available_airports(curr["lat"], curr["long"], curr["type"])
     print_available_airports()
 
-    # Ask player for airport index while input is valid
+    # Ask player for airport index while input is invalid
     index = input("\nEnter the index of the airport you want to fly to: ")
     while not index.isdigit() or (int(index) >= len(airports) or int(index) < 1):
         print(f"Your input is invalid. Please type a number from 1 to {len(airports)}")
