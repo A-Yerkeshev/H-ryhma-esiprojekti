@@ -8,7 +8,7 @@ yhteys = mysql.connector.connect(
     port=3306,
     database='flight_game',
     user='root',
-    password='toast',
+    password='pass',
     autocommit=False
 )
 
@@ -91,7 +91,7 @@ def fetch_available_airports(curr_lat, curr_long, type):
         # Calculate in which direction airport is located
         x = math.cos(airport['lat']) * math.sin(airport['long'] - curr['long'])
         y = math.cos(curr['lat']) * math.sin(airport['lat']) - math.sin(curr['lat']) * math.cos(
-        airport['lat']) * math.cos(airport['long'] - curr['long'])
+            airport['lat']) * math.cos(airport['long'] - curr['long'])
         bearing = math.degrees(math.atan2(x, y))
 
         if bearing >= -22.5 and bearing < 22.5:
@@ -128,7 +128,10 @@ def fetch_available_airports(curr_lat, curr_long, type):
 
 def print_available_airports():
     for i, airport in enumerate(airports):
-        print(f"{str(i + 1)+':':<5} {airport['airport_name'][0:49]+',':<50} {airport['type']:<15} {'in ' + airport['country_name'][0:22]:<25} {str(round(get_distance(curr['lat'], curr['long'], airport['lat'], airport['long']), 2))+' km':<15} {'to the '+airport['direction']+'.'}")
+        print(f"{str(i + 1) + ':':<5} {airport['airport_name'][0:49] + ',':<45}"
+              f" {airport['type']:<20} {airport['country_name'][0:22]:<25}"
+              f" {str(round(get_distance(curr['lat'], curr['long'], airport['lat'], airport['long']), 2)) + ' km':<15}"
+              f" {airport['direction']}")
 
 def print_results():
     # 1CO2 gramm = 1km*90gr/km
@@ -156,11 +159,13 @@ while curr['ident'] != dest['ident']:
     fetch_available_airports(curr["lat"], curr["long"], curr["type"])
     print_available_airports()
 
-    index = int(input("\nEnter the index of the airport you want to fly to: ")) - 1
+    index = input("\nEnter the index of the airport you want to fly to: ")
 
-    while index >= len(airports) or index < 0:
-        print(f"Your input is invalid. Please type a number between 1 and {len(airports)}")
-        index = int(input("\nEnter the index of the airport you want to fly to: ")) - 1
+    while not index.isdigit() or (int(index) >= len(airports) or int(index) < 1):
+        print(f"Your input is invalid. Please type a number from 1 to {len(airports)}")
+        index = input("\nEnter the index of the airport you want to fly to: ")
+
+    index = int(index) - 1
 
     temp_dest = airports[index]
     flight = get_distance(curr['lat'], curr['long'], temp_dest['lat'], temp_dest['long'])
