@@ -165,14 +165,6 @@ def move(index, flight):
     print("\r               >", end="")
     time.sleep(0.3)
 
-#def move(ident):
-#    global curr
-#    location = dist = get_distance(curr["lat"], curr["long"], dest["lat"], dest["long"])
-#    location = get_distance(temp_dest['lat'], temp_dest['long'], dest['lat'], dest['long'])
- #   (f"{curr[ident]} {dest['airport_name']}' {dest['country_name']}")
-
-
-
 
 def print_starting_message():
     print("Welcome to Group H's flight game. Your goal is to reach the given destination in as few turns as possible."
