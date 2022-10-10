@@ -8,7 +8,7 @@ connection = mysql.connector.connect(
     port=3306,
     database='flight_game',
     user='root',
-    password='password',
+    password='Cassandra-580',
     autocommit=False
 )
 
@@ -132,7 +132,7 @@ def print_available_airports():
     global dest
     for i, airport in enumerate(airports):
         if airport['ident'] == dest['ident']:
-            print("V" * 15 + "   YOUR DESTINATION   " + "V" * 15)
+            print("V-" * 7 + "   YOUR DESTINATION   " + "-V" * 7)
 
         print(f"{str(i + 1) + ':':<5} {airport['airport_name'][0:43] + ',':<45}"
               f" {airport['type']:<20} {airport['country_name'][0:23]:<25}"
@@ -145,7 +145,7 @@ def print_results():
     # One CO2 gram = 1km * 90gr/km
     print(f"\nCongratulations! You made it to your destination, {dest['airport_name']}.\n"
           f"It took you {turns_total} turns and {km_total:.1f} km in total.\n"
-          f"Your trip emitted {km_total * 90:.1f} grams of CO2.")
+          f"Your trip emitted {km_total * 90:.0f} grams of CO2.")
 
 
 def move(index, flight):
