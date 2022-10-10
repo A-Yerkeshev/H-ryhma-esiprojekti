@@ -81,6 +81,7 @@ def fetch_available_airports(curr_lat, curr_long, type):
     airports.clear()
 
     # Order airports by direction
+    direction_names = ['North', 'North-East', 'East', 'South-East', 'South', 'South-West', 'West', 'North-West']
     direction_groups = [[], [], [], [], [], [], [], []]
 
     for entry in result:
@@ -96,33 +97,11 @@ def fetch_available_airports(curr_lat, curr_long, type):
              math.cos(math.radians(airport['long'] - curr['long'])))
         bearing = math.degrees(math.atan2(x, y))
 
-        if bearing >= -22.5 and bearing < 22.5:
-            airport['direction'] = 'North'
-            direction_groups[0].append(airport)
-        elif bearing >= 22.5 and bearing < 67.5:
-            airport['direction'] = 'North-East'
-            direction_groups[1].append(airport)
-        elif bearing >= 67.5 and bearing < 112.5:
-            airport['direction'] = 'East'
-            direction_groups[2].append(airport)
-        elif bearing >= 112.5 and bearing < 157.5:
-            airport['direction'] = 'South-East'
-            direction_groups[3].append(airport)
-        elif bearing < -157.5 or bearing >= 157.5:
-            airport['direction'] = 'South'
-            direction_groups[4].append(airport)
-        elif bearing >= -157.5 and bearing < -112.5:
-            airport['direction'] = 'South-West'
-            direction_groups[5].append(airport)
-        elif bearing >= -112.5 and bearing < -67.5:
-            airport['direction'] = 'West'
-            direction_groups[6].append(airport)
-        elif bearing >= -67.5 and bearing < -22.5:
-            airport['direction'] = 'North-West'
-            direction_groups[7].append(airport)
-        else:
-            airport['direction'] = 'Unknown direction'
+        i = round(((bearing + 180)/45)+4)%8
+        airport['direction'] = direction_names[i]
+        direction_groups[i].append(airport)
 
+    # Order airports by direction
     for group in direction_groups:
         for airport in group:
             airports.append(airport)
