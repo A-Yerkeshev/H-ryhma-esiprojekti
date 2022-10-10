@@ -3,12 +3,12 @@ import mysql.connector
 import math
 import time
 
-yhteys = mysql.connector.connect(
+connection = mysql.connector.connect(
     host='127.0.0.1',
     port=3306,
     database='flight_game',
     user='root',
-    password='toast',
+    password='password',
     autocommit=False
 )
 
@@ -39,7 +39,7 @@ def generate_random_location():
           "FROM airport, country WHERE NOT type='closed' " \
           "and airport.iso_country = country.iso_country" \
           " ORDER BY RAND() LIMIT 1;"
-    cursor = yhteys.cursor()
+    cursor = connection.cursor()
     cursor.execute(sql)
     result = cursor.fetchall()
 
@@ -75,7 +75,7 @@ def fetch_available_airports(curr_lat, curr_long, type):
     AND type != 'closed'
     AND ident != '{curr["ident"]}'
     AND country.iso_country = airport.iso_country;"""
-    cursor = yhteys.cursor()
+    cursor = connection.cursor()
     cursor.execute(sql)
     result = cursor.fetchall()
     airports.clear()
@@ -194,6 +194,7 @@ curr = generate_random_location()
 dest = generate_random_location()
 dist = get_distance(curr["lat"], curr["long"], dest["lat"], dest["long"])
 
+# set game length by making sure destination is X to Y km away
 while dest == curr or (dist > 4000 or dist < 1500):
     dest = generate_random_location()
     dist = get_distance(curr["lat"], curr["long"], dest["lat"], dest["long"])
@@ -207,7 +208,7 @@ while curr['ident'] != dest['ident']:
           f"\nYour destination is '{dest['airport_name']}' in {dest['country_name']}."
           f"\nThe destination is {dist:.0f} km away.")
 
-    # Fetch and display airports within the reach of current location
+    # Fetch and display airports within reach of the current location
     input("\nPress 'Enter' to fetch the nearest airports.")
     fetch_available_airports(curr["lat"], curr["long"], curr["type"])
     print_available_airports()
@@ -231,4 +232,4 @@ while curr['ident'] != dest['ident']:
     move(index, airport_dist)
 
 print_results()
-yhteys.close()
+connection.close()
